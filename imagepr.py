@@ -3,48 +3,72 @@ import numpy as np
 from matplotlib import pyplot as plt
 
 # Load an color image in grayscale
-#cv2.namedWindow("output", cv2.WINDOW_NORMAL)
-img = cv2.imread(r'C:\Users\Admin\Desktop\Project\handwriting pics\Images1\Set2\pic (1).jpg',0)
-#imS = cv2.resize(img, (960, 540))                    # Resize image
+
+img = cv2.imread(r'grayscale.jpg',0)
+imS = cv2.resize(img, (960, 540))                    # Resize image
 #cv2.imshow("output", imS)                            # Show image
-#cv2.waitKey(0)
-#cv2.destroyAllWindows()
 
-#applying adaptive gausian thresholding
 
-img1=img
-cv2.namedWindow("output1", cv2.WINDOW_NORMAL)
-th3 = cv2.adaptiveThreshold(img1,255,cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY,71,11)
-print (th3.shape)
+#Applying Gaussian Threshold
+#th4 = cv2.adaptiveThreshold(img,255,cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY,71,11)
+#cv2.imshow("Window",th4)
+
+
+#applying Thresh_Otsu
+
+blur = cv2.GaussianBlur(img,(5,5),0)
+ret3,th3 = cv2.threshold(blur,0,255,cv2.THRESH_BINARY+cv2.THRESH_OTSU)
+#cv2.imshow("Window2",th3)
+
+
 row=th3.shape[0]
 col=th3.shape[1]
-print (row)
-im=cv2.resize(img,(row//5,col//5),interpolation=cv2.INTER_CUBIC)
-cv2.imshow("Result",im)
-#px= th3[500,700]
-#print (px)
-#for i in range(col):
-#    start=0
-#    while(th3[100,i]==0):
-#        i=i+1
-#    end=i
-#     im=img1.resize(img,()
-#     cv2.imshow("output",im)
+
+count = 0
+pixelval=list()
+for i in range(row+1):
+    pixelval.append(0)
+
+for i in range(1,row):
+    count = 0
+    for j in range(1,col):
+       if(th3[i,j]==0):
+           count=count+1
+    pixelval[i]=count
+
+# To hold Coordinates of the image
+img_cor=list()
+
+#Initialize the Variables
+k=1
+th=0
+i=1
+frame='frame'
+while i < row:
+    if pixelval[i] > th:
+        start=i
+        end=i
+        img_cor.append(start)
+        while pixelval[end] > th and end < row:
+            end = end + 1
+        i = end + 1
+        img_cor.append(i)
 
 
-im = cv2.resize(th3, (960, 540))                    # Resize image
-cv2.imshow("output1", im)                            # Show image
-cv2.waitKey(0)
-cv2.destroyAllWindows()
+    else :
+        i = i + 1
 
-#
-"""
-cv2.namedWindow("output1", cv2.WINDOW_NORMAL)
-ret,thre1 = cv2.threshold(img,127,255,cv2.THRESH_BINARY)
-print (type(thre1))
-im = cv2.resize(thre1, (960, 540))                    # Resize image
-cv2.imshow("output1", im)                            # Show image
-cv2.waitKey(0)
-cv2.destroyAllWindows()
+# Display the images of lines
+i=0
+while i < len(img_cor):
+    line = th3[img_cor[i]:img_cor[i+1],0:col]
+    cv2.imshow(frame,line)
+    i=i+2
+    frame=frame+str(i)
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
 
-"""
+# Word Seperation
+
+
+
